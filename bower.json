@@ -1,6 +1,6 @@
 {
   "name": "sugar-enumerable",
-  "description": "A Javascript utility library for working with native objects. Enumerable module (shared methods on Array and Object).",
+  "description": "Enumerable module for the Sugar Javascript utility library.",
   "homepage": "https://sugarjs.com/",
   "license": "MIT",
   "authors": [
