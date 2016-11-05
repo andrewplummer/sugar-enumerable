@@ -1,5 +1,5 @@
 /*
- *  Sugar v2.0.0
+ *  Sugar v2.0.2
  *
  *  Freely distributable and licensed under the MIT-style license.
  *  Copyright (c) Andrew Plummer
@@ -94,9 +94,9 @@
   }
 
   /***
-   * @method createNamespace(<name>)
-   * @returns Namespace
-   * @global
+   * @method createNamespace(name)
+   * @returns SugarNamespace
+   * @namespace Sugar
    * @short Creates a new Sugar namespace.
    * @extra This method is for plugin developers who want to define methods to be
    *        used with natives that Sugar does not handle by default. The new
@@ -109,6 +109,8 @@
    *
    *   Sugar.createNamespace('Boolean');
    *
+   * @param {string} name - The namespace name.
+   *
    ***/
   function createNamespace(name) {
 
@@ -119,14 +121,13 @@
     var sugarNamespace = getNewChainableClass(name, true);
 
     /***
-     * @method extend([options])
+     * @method extend([opts])
      * @returns Sugar
-     * @global
-     * @namespace
+     * @namespace Sugar
      * @short Extends Sugar defined methods onto natives.
      * @extra This method can be called on individual namespaces like
      *        `Sugar.Array` or on the `Sugar` global itself, in which case
-     *        [options] will be forwarded to each `extend` call. For more,
+     *        [opts] will be forwarded to each `extend` call. For more,
      *        see `extending`.
      *
      * @options
@@ -158,6 +159,22 @@
      *
      *   Sugar.Array.extend();
      *   Sugar.extend();
+     *
+     * @option {Array<string>} [methods]
+     * @option {Array<string|NativeConstructor>} [except]
+     * @option {Array<NativeConstructor>} [namespaces]
+     * @option {boolean} [enhance]
+     * @option {boolean} [enhanceString]
+     * @option {boolean} [enhanceArray]
+     * @option {boolean} [objectPrototype]
+     * @param {ExtendOptions} [opts]
+     *
+     ***
+     * @method extend([opts])
+     * @returns SugarNamespace
+     * @namespace SugarNamespace
+     * @short Extends Sugar defined methods for a specific namespace onto natives.
+     * @param {ExtendOptions} [opts]
      *
      ***/
     var extend = function (opts) {
@@ -255,7 +272,7 @@
         // methods, so add a flag here to check later.
         setProperty(sugarNamespace, 'active', true);
       }
-      return Sugar;
+      return sugarNamespace;
     };
 
     function defineWithOptionCollect(methodName, instance, args) {
@@ -267,9 +284,9 @@
     }
 
     /***
-     * @method defineStatic(...)
-     * @returns Namespace
-     * @namespace
+     * @method defineStatic(methods)
+     * @returns SugarNamespace
+     * @namespace SugarNamespace
      * @short Defines static methods on the namespace that can later be extended
      *        onto the native globals.
      * @extra Accepts either a single object mapping names to functions, or name
@@ -285,13 +302,17 @@
      *     }
      *   });
      *
+     * @signature defineStatic(methodName, methodFn)
+     * @param {Object} methods - Methods to be defined.
+     * @param {string} methodName - Name of a single method to be defined.
+     * @param {Function} methodFn - Function body of a single method to be defined.
      ***/
     defineWithOptionCollect('defineStatic', STATIC);
 
     /***
-     * @method defineInstance(...)
-     * @returns Namespace
-     * @namespace
+     * @method defineInstance(methods)
+     * @returns SugarNamespace
+     * @namespace SugarNamespace
      * @short Defines methods on the namespace that can later be extended as
      *        instance methods onto the native prototype.
      * @extra Accepts either a single object mapping names to functions, or name
@@ -315,13 +336,17 @@
      *     }
      *   });
      *
+     * @signature defineInstance(methodName, methodFn)
+     * @param {Object} methods - Methods to be defined.
+     * @param {string} methodName - Name of a single method to be defined.
+     * @param {Function} methodFn - Function body of a single method to be defined.
      ***/
     defineWithOptionCollect('defineInstance', INSTANCE);
 
     /***
-     * @method defineInstanceAndStatic(...)
-     * @returns Namespace
-     * @namespace
+     * @method defineInstanceAndStatic(methods)
+     * @returns SugarNamespace
+     * @namespace SugarNamespace
      * @short A shortcut to define both static and instance methods on the namespace.
      * @extra This method is intended for use with `Object` instance methods. Sugar
      *        will not map any methods to `Object.prototype` by default, so defining
@@ -335,14 +360,18 @@
      *     }
      *   });
      *
+     * @signature defineInstanceAndStatic(methodName, methodFn)
+     * @param {Object} methods - Methods to be defined.
+     * @param {string} methodName - Name of a single method to be defined.
+     * @param {Function} methodFn - Function body of a single method to be defined.
      ***/
     defineWithOptionCollect('defineInstanceAndStatic', INSTANCE | STATIC);
 
 
     /***
-     * @method defineStaticWithArguments(...)
-     * @returns Namespace
-     * @namespace
+     * @method defineStaticWithArguments(methods)
+     * @returns SugarNamespace
+     * @namespace SugarNamespace
      * @short Defines static methods that collect arguments.
      * @extra This method is identical to `defineStatic`, except that when defined
      *        methods are called, they will collect any arguments past `n - 1`,
@@ -361,13 +390,17 @@
      *     }
      *   });
      *
+     * @signature defineStaticWithArguments(methodName, methodFn)
+     * @param {Object} methods - Methods to be defined.
+     * @param {string} methodName - Name of a single method to be defined.
+     * @param {Function} methodFn - Function body of a single method to be defined.
      ***/
     defineWithOptionCollect('defineStaticWithArguments', STATIC, true);
 
     /***
-     * @method defineInstanceWithArguments(...)
-     * @returns Namespace
-     * @namespace
+     * @method defineInstanceWithArguments(methods)
+     * @returns SugarNamespace
+     * @namespace SugarNamespace
      * @short Defines instance methods that collect arguments.
      * @extra This method is identical to `defineInstance`, except that when
      *        defined methods are called, they will collect any arguments past
@@ -386,13 +419,17 @@
      *     }
      *   });
      *
+     * @signature defineInstanceWithArguments(methodName, methodFn)
+     * @param {Object} methods - Methods to be defined.
+     * @param {string} methodName - Name of a single method to be defined.
+     * @param {Function} methodFn - Function body of a single method to be defined.
      ***/
     defineWithOptionCollect('defineInstanceWithArguments', INSTANCE, true);
 
     /***
-     * @method defineStaticPolyfill(...)
-     * @returns Namespace
-     * @namespace
+     * @method defineStaticPolyfill(methods)
+     * @returns SugarNamespace
+     * @namespace SugarNamespace
      * @short Defines static methods that are mapped onto the native if they do
      *        not already exist.
      * @extra Intended only for use creating polyfills that follow the ECMAScript
@@ -407,16 +444,21 @@
      *     }
      *   });
      *
+     * @signature defineStaticPolyfill(methodName, methodFn)
+     * @param {Object} methods - Methods to be defined.
+     * @param {string} methodName - Name of a single method to be defined.
+     * @param {Function} methodFn - Function body of a single method to be defined.
      ***/
     setProperty(sugarNamespace, 'defineStaticPolyfill', function(arg1, arg2, arg3) {
       var opts = collectDefineOptions(arg1, arg2, arg3);
       extendNative(globalContext[name], opts.methods, true, opts.last);
+      return sugarNamespace;
     });
 
     /***
-     * @method defineInstancePolyfill(...)
-     * @returns Namespace
-     * @namespace
+     * @method defineInstancePolyfill(methods)
+     * @returns SugarNamespace
+     * @namespace SugarNamespace
      * @short Defines instance methods that are mapped onto the native prototype
      *        if they do not already exist.
      * @extra Intended only for use creating polyfills that follow the ECMAScript
@@ -434,6 +476,10 @@
      *     }
      *   });
      *
+     * @signature defineInstancePolyfill(methodName, methodFn)
+     * @param {Object} methods - Methods to be defined.
+     * @param {string} methodName - Name of a single method to be defined.
+     * @param {Function} methodFn - Function body of a single method to be defined.
      ***/
     setProperty(sugarNamespace, 'defineInstancePolyfill', function(arg1, arg2, arg3) {
       var opts = collectDefineOptions(arg1, arg2, arg3);
@@ -442,22 +488,27 @@
       forEachProperty(opts.methods, function(fn, methodName) {
         defineChainableMethod(sugarNamespace, methodName, fn);
       });
+      return sugarNamespace;
     });
 
     /***
-     * @method alias(<toName>, <fromName>)
-     * @returns Namespace
-     * @namespace
+     * @method alias(toName, from)
+     * @returns SugarNamespace
+     * @namespace SugarNamespace
      * @short Aliases one Sugar method to another.
      *
      * @example
      *
      *   Sugar.Array.alias('all', 'every');
      *
+     * @signature alias(toName, fn)
+     * @param {string} toName - Name for new method.
+     * @param {string|Function} from - Method to alias, or string shortcut.
      ***/
     setProperty(sugarNamespace, 'alias', function(name, source) {
       var method = typeof source === 'string' ? sugarNamespace[source] : source;
       setMethod(sugarNamespace, name, method);
+      return sugarNamespace;
     });
 
     // Each namespace can extend only itself through its .extend method.
@@ -1052,11 +1103,20 @@
       return obj[name];
     }
 
-    function setOption(name, val) {
-      if (val === null) {
-        val = defaults[name];
+    function setOption(arg1, arg2) {
+      var options;
+      if (arguments.length === 1) {
+        options = arg1;
+      } else {
+        options = {};
+        options[arg1] = arg2;
       }
-      obj[name] = val;
+      forEachProperty(options, function(val, name) {
+        if (val === null) {
+          val = defaults[name];
+        }
+        obj[name] = val;
+      });
     }
 
     defineAccessor(namespace, 'getOption', getOption);
@@ -2049,7 +2109,7 @@
   defineStaticPolyfill(sugarArray, {
 
     /***
-     * @method from(<a>, [map], [context])
+     * @method from(a, [map], [context])
      * @returns Mixed
      * @polyfill ES6
      * @static
@@ -2142,10 +2202,10 @@
   defineInstancePolyfill(sugarArray, {
 
     /***
-     * @method includes(<search>, [fromIndex] = 0)
+     * @method includes(search, [fromIndex] = 0)
      * @returns Boolean
      * @polyfill ES7
-     * @short Returns true if <search> is contained within the array.
+     * @short Returns true if `search` is contained within the array.
      * @extra Search begins at [fromIndex], which defaults to the beginning of the
      *        array.
      *
@@ -2367,9 +2427,9 @@
 
 
   /***
-   * @method [fn]FromIndex(<startIndex>, [loop], ...)
+   * @method [fn]FromIndex(startIndex, [loop], ...)
    * @returns Mixed
-   * @short Runs native array functions beginning from <startIndex>.
+   * @short Runs native array functions beginning from `startIndex`.
    * @extra If [loop] is `true`, once the end of the array has been reached,
    *        iteration will continue from the start of the array up to
    *        `startIndex - 1`. If [loop] is false it can be omitted. Standard
@@ -2397,6 +2457,10 @@
    *   users.mapFromIndex(2, true, 'name');
    *   names.forEachFromIndex(10, log);
    *   names.everyFromIndex(15, /^[A-F]/);
+   *
+   * @signature [fn]FromIndex(startIndex, ...)
+   * @param {number} startIndex
+   * @param {boolean} loop
    *
    ***/
   function buildFromIndexMethods() {
@@ -2551,17 +2615,17 @@
   defineInstance(sugarArray, {
 
     /***
-     * @method map(<map>, [context])
-     * @returns Array
+     * @method map(map, [context])
+     * @returns New Array
      * @polyfill ES5
      * @short Maps the array to another array whose elements are the values
-     *        returned by the <map> callback.
+     *        returned by the `map` callback.
      * @extra [context] is the `this` object. Sugar enhances this method to accept
-     *        a string for <map>, which is a shortcut for a function that gets
+     *        a string for `map`, which is a shortcut for a function that gets
      *        a property or invokes a function on each element.
      *        Supports `deep properties`.
      *
-     * @callback map
+     * @callback mapFn
      *
      *   el   The element of the current iteration.
      *   i    The index of the current iteration.
@@ -2577,17 +2641,24 @@
      *   ['A','B','C'].map('toLowerCase') -> ['a','b','c']
      *   users.map('name') -> array of user names
      *
+     * @param {string|mapFn} map
+     * @param {any} context
+     * @callbackParam {ArrayElement} el
+     * @callbackParam {number} i
+     * @callbackParam {Array} arr
+     * @callbackReturns {NewArrayElement} mapFn
+     *
      ***/
     'map': fixArgumentLength(enhancedMap),
 
     /***
-     * @method some(<search>, [context])
+     * @method some(search, [context])
      * @returns Boolean
      * @polyfill ES5
-     * @short Returns true if <search> is true for any element in the array.
+     * @short Returns true if `search` is true for any element in the array.
      * @extra [context] is the `this` object. Implements `enhanced matching`.
      *
-     * @callback search
+     * @callback searchFn
      *
      *   el   The element of the current iteration.
      *   i    The index of the current iteration.
@@ -2605,17 +2676,24 @@
      *   [{a:2},{b:5}].some({a:2})  -> true
      *   users.some({ name: /^H/ }) -> true if any have a name starting with H
      *
+     * @param {ArrayElement|searchFn} search
+     * @param {any} context
+     * @callbackParam {ArrayElement} el
+     * @callbackParam {number} i
+     * @callbackParam {Array} arr
+     * @callbackReturns {boolean} searchFn
+     *
      ***/
     'some': fixArgumentLength(enhancedSome),
 
     /***
-     * @method every(<search>, [context])
+     * @method every(search, [context])
      * @returns Boolean
      * @polyfill ES5
-     * @short Returns true if <search> is true for all elements of the array.
+     * @short Returns true if `search` is true for all elements of the array.
      * @extra [context] is the `this` object. Implements `enhanced matching`.
      *
-     * @callback search
+     * @callback searchFn
      *
      *   el   The element of the current iteration.
      *   i    The index of the current iteration.
@@ -2630,17 +2708,24 @@
      *   [{a:2},{a:2}].every({a:2}) -> true
      *   users.every({ name: /^H/ }) -> true if all have a name starting with H
      *
+     * @param {ArrayElement|searchFn} search
+     * @param {any} context
+     * @callbackParam {ArrayElement} el
+     * @callbackParam {number} i
+     * @callbackParam {Array} arr
+     * @callbackReturns {boolean} searchFn
+     *
      ***/
     'every': fixArgumentLength(enhancedEvery),
 
     /***
-     * @method filter(<search>, [context])
+     * @method filter(search, [context])
      * @returns Array
      * @polyfill ES5
-     * @short Returns any elements in the array that match <search>.
+     * @short Returns any elements in the array that match `search`.
      * @extra [context] is the `this` object. Implements `enhanced matching`.
      *
-     * @callback search
+     * @callback searchFn
      *
      *   el   The element of the current iteration.
      *   i    The index of the current iteration.
@@ -2654,17 +2739,24 @@
      *   [1,2,2,4].filter(2) -> 2
      *   users.filter({ name: /^H/ }) -> all users with a name starting with H
      *
+     * @param {ArrayElement|searchFn} search
+     * @param {any} context
+     * @callbackParam {ArrayElement} el
+     * @callbackParam {number} i
+     * @callbackParam {Array} arr
+     * @callbackReturns {boolean} searchFn
+     *
      ***/
     'filter': fixArgumentLength(enhancedFilter),
 
     /***
-     * @method find(<search>, [context])
+     * @method find(search, [context])
      * @returns Mixed
      * @polyfill ES6
-     * @short Returns the first element in the array that matches <search>.
+     * @short Returns the first element in the array that matches `search`.
      * @extra Implements `enhanced matching`.
      *
-     * @callback search
+     * @callback searchFn
      *
      *   el   The element of the current iteration.
      *   i    The index of the current iteration.
@@ -2680,19 +2772,25 @@
      *   users.find({ name: /^[A-H]/ });  -> First user with name starting with A-H
      *   users.find({ titles: ['Ms', 'Dr'] }); -> not harry!
      *
+     * @param {ArrayElement|searchFn} search
+     * @param {any} context
+     * @callbackParam {ArrayElement} el
+     * @callbackParam {number} i
+     * @callbackParam {Array} arr
+     * @callbackReturns {boolean} searchFn
      *
      ***/
     'find': fixArgumentLength(enhancedFind),
 
     /***
-     * @method findIndex(<search>, [context])
+     * @method findIndex(search, [context])
      * @returns Number
      * @polyfill ES6
      * @short Returns the index of the first element in the array that matches
-     *        <search>, or `-1` if none.
+     *        `search`, or `-1` if none.
      * @extra [context] is the `this` object. Implements `enhanced matching`.
      *
-     * @callback search
+     * @callback searchFn
      *
      *   el   The element of the current iteration.
      *   i    The index of the current iteration.
@@ -2706,6 +2804,13 @@
      *   ['a','b','c'].findIndex('c');        -> 2
      *   ['cuba','japan','canada'].find(/^c/) -> 0
      *
+     * @param {ArrayElement|searchFn} search
+     * @param {any} context
+     * @callbackParam {ArrayElement} el
+     * @callbackParam {number} i
+     * @callbackParam {Array} arr
+     * @callbackReturns {boolean} searchFn
+     *
      ***/
     'findIndex': fixArgumentLength(enhancedFindIndex)
 
@@ -2715,13 +2820,13 @@
   defineInstance(sugarArray, {
 
     /***
-     * @method none(<search>, [context])
+     * @method none(search, [context])
      *
      * @returns Boolean
-     * @short Returns true if none of the elements in the array match <search>.
+     * @short Returns true if none of the elements in the array match `search`.
      * @extra [context] is the `this` object. Implements `enhanced matching`.
      *
-     * @callback search
+     * @callback searchFn
      *
      *   el   The element of the current iteration.
      *   i    The index of the current iteration.
@@ -2736,16 +2841,23 @@
      *   }); -> probably true
      *   users.none({ name: 'Wolverine' }); -> same as above
      *
+     * @param {ArrayElement|searchFn} search
+     * @param {any} context
+     * @callbackParam {ArrayElement} el
+     * @callbackParam {number} i
+     * @callbackParam {Array} arr
+     * @callbackReturns {boolean} searchFn
+     *
      ***/
     'none': fixArgumentLength(arrayNone),
 
     /***
-     * @method count(<search>)
+     * @method count(search, [context])
      * @returns Number
-     * @short Counts all elements in the array that match <search>.
+     * @short Counts all elements in the array that match `search`.
      * @extra Implements `enhanced matching`.
      *
-     * @callback search
+     * @callback searchFn
      *
      *   el   The element of the current iteration.
      *   i    The index of the current iteration.
@@ -2759,6 +2871,13 @@
      *     return user.age > 30;
      *   }); -> number of users older than 30
      *
+     * @param {ArrayElement|searchFn} search
+     * @param {any} context
+     * @callbackParam {ArrayElement} el
+     * @callbackParam {number} i
+     * @callbackParam {Array} arr
+     * @callbackReturns {boolean} searchFn
+     *
      ***/
     'count': fixArgumentLength(arrayCount),
 
@@ -2770,7 +2889,7 @@
      *        value to be checked or a string acting as a shortcut. If [all] is
      *        true, multiple elements will be returned. Supports `deep properties`.
      *
-     * @callback map
+     * @callback mapFn
      *
      *   el   The element of the current iteration.
      *   i    The index of the current iteration.
@@ -2787,6 +2906,13 @@
      *     return n.length;
      *   }); -> ['fo']
      *
+     * @signature min([map])
+     * @param {string|mapFn} map
+     * @param {boolean} all
+     * @callbackParam {ArrayElement} el
+     * @callbackParam {number} i
+     * @callbackParam {Array} arr
+     * @callbackReturns {NewArrayElement} mapFn
      *
      ***/
     'min': function(arr, all, map) {
@@ -2801,7 +2927,7 @@
      *        value to be checked or a string acting as a shortcut. If [all] is
      *        true, multiple elements will be returned. Supports `deep properties`.
      *
-     * @callback map
+     * @callback mapFn
      *
      *   el   The element of the current iteration.
      *   i    The index of the current iteration.
@@ -2818,6 +2944,14 @@
      *     return n.length;
      *   }); -> ['fee', 'fum']
      *
+     * @signature max([map])
+     * @param {string|mapFn} map
+     * @param {boolean} all
+     * @callbackParam {ArrayElement} el
+     * @callbackParam {number} i
+     * @callbackParam {Array} arr
+     * @callbackReturns {NewArrayElement} mapFn
+     *
      ***/
     'max': function(arr, all, map) {
       return getMinOrMax(arr, all, map, true);
@@ -2832,7 +2966,7 @@
      *        true, will return multiple values in an array.
      *        Supports `deep properties`.
      *
-     * @callback map
+     * @callback mapFn
      *
      *   el   The element of the current iteration.
      *   i    The index of the current iteration.
@@ -2844,6 +2978,14 @@
      *   ['fe','fo','fum'].least(true, 'length') -> ['fum']
      *   users.least('profile.type')             -> (user with least commonly occurring type)
      *   users.least(true, 'profile.type')       -> (users with least commonly occurring type)
+     *
+     * @signature least([map])
+     * @param {string|mapFn} map
+     * @param {boolean} all
+     * @callbackParam {ArrayElement} el
+     * @callbackParam {number} i
+     * @callbackParam {Array} arr
+     * @callbackReturns {NewArrayElement} mapFn
      *
      ***/
     'least': function(arr, all, map) {
@@ -2859,7 +3001,7 @@
      *        true, will return multiple values in an array.
      *        Supports `deep properties`.
      *
-     * @callback map
+     * @callback mapFn
      *
      *   el   The element of the current iteration.
      *   i    The index of the current iteration.
@@ -2871,6 +3013,14 @@
      *   ['fe','fo','fum'].most(true, 'length') -> ['fe','fo']
      *   users.most('profile.type')             -> (user with most commonly occurring type)
      *   users.most(true, 'profile.type')       -> (users with most commonly occurring type)
+     *
+     * @signature most([map])
+     * @param {string|mapFn} map
+     * @param {boolean} all
+     * @callbackParam {ArrayElement} el
+     * @callbackParam {number} i
+     * @callbackParam {Array} arr
+     * @callbackReturns {NewArrayElement} mapFn
      *
      ***/
     'most': function(arr, all, map) {
@@ -2884,7 +3034,7 @@
      * @extra [map] may be a function mapping the value to be summed or a string
      *        acting as a shortcut.
      *
-     * @callback map
+     * @callback mapFn
      *
      *   el   The element of the current iteration.
      *   i    The index of the current iteration.
@@ -2898,6 +3048,12 @@
      *   }); -> total votes!
      *   users.sum('votes') -> total votes!
      *
+     * @param {string|mapFn} map
+     * @callbackParam {ArrayElement} el
+     * @callbackParam {number} i
+     * @callbackParam {Array} arr
+     * @callbackReturns {NewArrayElement} mapFn
+     *
      ***/
     'sum': function(arr, map) {
       return sum(arr, map);
@@ -2910,7 +3066,7 @@
      * @extra [map] may be a function mapping the value to be averaged or a string
      *        acting as a shortcut. Supports `deep properties`.
      *
-     * @callback map
+     * @callback mapFn
      *
      *   el   The element of the current iteration.
      *   i    The index of the current iteration.
@@ -2925,6 +3081,12 @@
      *   users.average('age') -> average user age
      *   users.average('currencies.usd.balance') -> average USD balance
      *
+     * @param {string|mapFn} map
+     * @callbackParam {ArrayElement} el
+     * @callbackParam {number} i
+     * @callbackParam {Array} arr
+     * @callbackReturns {NewArrayElement} mapFn
+     *
      ***/
     'average': function(arr, map) {
       return average(arr, map);
@@ -2937,7 +3099,7 @@
      * @extra [map] may be a function mapping the value to be averaged or a string
      *        acting as a shortcut.
      *
-     * @callback map
+     * @callback mapFn
      *
      *   el   The element of the current iteration.
      *   i    The index of the current iteration.
@@ -2949,6 +3111,12 @@
      *   [{a:1},{a:2},{a:2}].median('a') -> 2
      *   users.median('age') -> median user age
      *   users.median('currencies.usd.balance') -> median USD balance
+     *
+     * @param {string|mapFn} map
+     * @callbackParam {ArrayElement} el
+     * @callbackParam {number} i
+     * @callbackParam {Array} arr
+     * @callbackReturns {NewArrayElement} mapFn
      *
      ***/
     'median': function(arr, map) {
@@ -3033,12 +3201,12 @@
   defineInstanceAndStatic(sugarObject, {
 
     /***
-     * @method forEach(<obj>, <fn>)
+     * @method forEach(fn)
      * @returns Object
-     * @short Runs <fn> against each property in the object.
+     * @short Runs `fn` against each property in the object.
      * @extra Does not iterate over inherited or non-enumerable properties.
      *
-     * @callback fn
+     * @callback eachFn
      *
      *   val  The value of the current iteration.
      *   key  The key of the current iteration.
@@ -3050,21 +3218,26 @@
      *     // val = 'b', key = a
      *   });
      *
+     * @param {eachFn} fn
+     * @callbackParam {Property} val
+     * @callbackParam {string} key
+     * @callbackParam {Object} obj
+     *
      ***/
     'forEach': function(obj, fn) {
       return objectForEach(obj, fn);
     },
 
     /***
-     * @method map(<obj>, <map>)
+     * @method map(map)
      * @returns Object
      * @short Maps the object to another object whose properties are the values
-     *        returned by <map>.
-     * @extra <map> can also be a string, which is a shortcut for a function that
+     *        returned by `map`.
+     * @extra `map` can also be a string, which is a shortcut for a function that
      *        gets that property (or invokes a function) on each element.
      *        Supports `deep properties`.
      *
-     * @callback map
+     * @callback mapFn
      *
      *   val  The value of the current property.
      *   key  The key of the current property.
@@ -3072,10 +3245,16 @@
      *
      * @example
      *
-     *   Object.map({a:'b'}, function(val, key) {
+     *   data.map(function(val, key) {
      *     return key;
      *   }); -> {a:'b'}
-     *   Object.map(usersByName, 'age');
+     *   users.map('age');
+     *
+     * @param {string|mapFn} map
+     * @callbackParam {Property} val
+     * @callbackParam {string} key
+     * @callbackParam {Object} obj
+     * @callbackReturns {NewProperty} mapFn
      *
      ***/
     'map': function(obj, map) {
@@ -3083,12 +3262,12 @@
     },
 
     /***
-     * @method some(<obj>, <search>)
+     * @method some(search)
      * @returns Boolean
-     * @short Returns true if <search> is true for any property in the object.
+     * @short Returns true if `search` is true for any property in the object.
      * @extra Implements `enhanced matching`.
      *
-     * @callback search
+     * @callback searchFn
      *
      *   val  The value of the current iteration.
      *   key  The key of the current iteration.
@@ -3101,16 +3280,22 @@
      *   }); -> true
      *   Object.some({a:1,b:2}, 1); -> true
      *
+     * @param {Property|searchFn} search
+     * @callbackParam {Property} val
+     * @callbackParam {string} key
+     * @callbackParam {Object} obj
+     * @callbackReturns {boolean} searchFn
+     *
      ***/
     'some': objectSome,
 
     /***
-     * @method every(<obj>, <search>)
+     * @method every(search)
      * @returns Boolean
-     * @short Returns true if <search> is true for all properties in the object.
+     * @short Returns true if `search` is true for all properties in the object.
      * @extra Implements `enhanced matching`.
      *
-     * @callback search
+     * @callback searchFn
      *
      *   val  The value of the current iteration.
      *   key  The key of the current iteration.
@@ -3123,16 +3308,22 @@
      *   }); -> true
      *   Object.every({a:'a',b:'b'}, /[a-z]/); -> true
      *
+     * @param {Property|searchFn} search
+     * @callbackParam {Property} val
+     * @callbackParam {string} key
+     * @callbackParam {Object} obj
+     * @callbackReturns {boolean} searchFn
+     *
      ***/
     'every': objectEvery,
 
     /***
-     * @method filter(<obj>, <search>)
+     * @method filter(search)
      * @returns Array
-     * @short Returns a new object with properties that match <search>.
+     * @short Returns a new object with properties that match `search`.
      * @extra Implements `enhanced matching`.
      *
-     * @callback search
+     * @callback searchFn
      *
      *   val  The value of the current iteration.
      *   key  The key of the current iteration.
@@ -3146,33 +3337,39 @@
      *   Object.filter({a:'a',z:'z'}, /[a-f]/); -> {a:'a'}
      *   Object.filter(usersByName, /^H/); -> all users with names starting with H
      *
+     * @param {Property|searchFn} search
+     * @callbackParam {Property} val
+     * @callbackParam {string} key
+     * @callbackParam {Object} obj
+     * @callbackReturns {boolean} searchFn
+     *
      ***/
     'filter': function(obj, f) {
       return objectFilter(obj, f);
     },
 
     /***
-     * @method reduce(<obj>, <fn>, [init])
+     * @method reduce(reduceFn, [init])
      * @returns Mixed
      * @short Reduces the object to a single result.
      * @extra This operation is sometimes called "accumulation", as it takes the
-     *        result of the last iteration of <fn> and passes it as the first
+     *        result of the last iteration of `fn` and passes it as the first
      *        argument to the next iteration, "accumulating" that value as it goes.
      *        The return value of this method will be the return value of the final
-     *        iteration of <fn>. If [init] is passed, it will be the initial
+     *        iteration of `fn`. If [init] is passed, it will be the initial
      *        "accumulator" (the first argument). If [init] is not passed, then a
-     *        property of the object will be used instead and <fn> will not be
+     *        property of the object will be used instead and `fn` will not be
      *        called for that property. Note that object properties have no order,
      *        and this may lead to bugs (for example if performing division or
      *        subtraction operations on a value). If order is important, use an
      *        array instead!
      *
-     * @callback fn
+     * @callback reduceFn
      *
      *   acc  The "accumulator", either [init], the result of the last iteration
-     *        of <fn>, or a property of <obj>.
-     *   val  The value of the current property called for <fn>.
-     *   key  The key of the current property called for <fn>.
+     *        of `fn`, or a property of `obj`.
+     *   val  The value of the current property called for `fn`.
+     *   key  The key of the current property called for `fn`.
      *   obj  A reference to the object.
      *
      * @example
@@ -3186,20 +3383,27 @@
      *   }, 10); -> 80
      *
      *
+     * @param {reduceFn} reduceFn
+     * @param {any} [init]
+     * @callbackParam {Property} acc
+     * @callbackParam {Property} val
+     * @callbackParam {string} key
+     * @callbackParam {Object} obj
+     *
      ***/
     'reduce': function(obj, fn, init) {
       return objectReduce(obj, fn, init);
     },
 
     /***
-     * @method find(<obj>, <search>)
+     * @method find(search)
      * @returns Boolean
-     * @short Returns the first key whose value matches <search>.
+     * @short Returns the first key whose value matches `search`.
      * @extra Implements `enhanced matching`. Note that "first" is
      *        implementation-dependent. If order is important an array should be
      *        used instead.
      *
-     * @callback search
+     * @callback searchFn
      *
      *   val  The value of the current iteration.
      *   key  The key of the current iteration.
@@ -3212,16 +3416,22 @@
      *   }); -> 'b'
      *   Object.find({a:'a',b:'b'}, /[a-z]/); -> 'a'
      *
+     * @param {Property|searchFn} search
+     * @callbackParam {Property} val
+     * @callbackParam {string} key
+     * @callbackParam {Object} obj
+     * @callbackReturns {boolean} searchFn
+     *
      ***/
     'find': objectFind,
 
     /***
-     * @method count(<obj>, <search>)
+     * @method count(search)
      * @returns Number
-     * @short Counts all properties in the object that match <search>.
+     * @short Counts all properties in the object that match `search`.
      * @extra Implements `enhanced matching`.
      *
-     * @callback search
+     * @callback searchFn
      *
      *   val  The value of the current iteration.
      *   key  The key of the current iteration.
@@ -3235,18 +3445,24 @@
      *   }); -> number of users older than 30
      *   Object.count(usersByName, { name: /^[H-Z]/ });
      *
+     * @param {Property|searchFn} search
+     * @callbackParam {Property} val
+     * @callbackParam {string} key
+     * @callbackParam {Object} obj
+     * @callbackReturns {boolean} searchFn
+     *
      ***/
     'count': function(obj, f) {
       return objectCount(obj, f);
     },
 
     /***
-     * @method none(<obj>, <search>)
+     * @method none(search)
      * @returns Boolean
-     * @short Returns true if none of the properties in the object match <search>.
+     * @short Returns true if none of the properties in the object match `search`.
      * @extra Implements `enhanced matching`.
      *
-     * @callback search
+     * @callback searchFn
      *
      *   val  The value of the current iteration.
      *   key  The key of the current iteration.
@@ -3259,19 +3475,25 @@
      *     return user.name == 'Wolverine';
      *   }); -> probably true
      *
+     * @param {Property|searchFn} search
+     * @callbackParam {Property} val
+     * @callbackParam {string} key
+     * @callbackParam {Object} obj
+     * @callbackReturns {boolean} searchFn
+     *
      ***/
     'none': function(obj, f) {
       return objectNone(obj, f);
     },
 
     /***
-     * @method sum(<obj>, [map])
+     * @method sum([map])
      * @returns Number
      * @short Sums all properties in the object.
      * @extra [map] may be a function mapping the value to be summed or a string
      *        acting as a shortcut.
      *
-     * @callback map
+     * @callback mapFn
      *
      *   val  The value of the current iteration.
      *   key  The key of the current iteration.
@@ -3284,19 +3506,25 @@
      *     return user.votes;
      *   }); -> total user votes
      *
+     * @param {string|mapFn} map
+     * @callbackParam {Property} val
+     * @callbackParam {string} key
+     * @callbackParam {Object} obj
+     * @callbackReturns {NewProperty} mapFn
+     *
      ***/
     'sum': function(obj, map) {
       return sum(obj, map);
     },
 
     /***
-     * @method average(<obj>, [map])
+     * @method average([map])
      * @returns Number
      * @short Gets the mean average of all properties in the object.
      * @extra [map] may be a function mapping the value to be averaged or a string
      *        acting as a shortcut.
      *
-     * @callback map
+     * @callback mapFn
      *
      *   val  The value of the current iteration.
      *   key  The key of the current iteration.
@@ -3308,19 +3536,25 @@
      *   Object.average(usersByName, 'age'); -> average user age
      *   Object.average(usersByName, 'currencies.usd.balance'); -> USD mean balance
      *
+     * @param {string|mapFn} map
+     * @callbackParam {Property} val
+     * @callbackParam {string} key
+     * @callbackParam {Object} obj
+     * @callbackReturns {NewProperty} mapFn
+     *
      ***/
     'average': function(obj, map) {
       return average(obj, map);
     },
 
     /***
-     * @method median(<obj>, [map])
+     * @method median([map])
      * @returns Number
      * @short Gets the median average of all properties in the object.
      * @extra [map] may be a function mapping the value to be averaged or a string
      *        acting as a shortcut.
      *
-     * @callback map
+     * @callback mapFn
      *
      *   val  The value of the current iteration.
      *   key  The key of the current iteration.
@@ -3332,13 +3566,19 @@
      *   Object.median(usersByName, 'age'); -> median user age
      *   Object.median(usersByName, 'currencies.usd.balance'); -> USD median balance
      *
+     * @param {string|mapFn} map
+     * @callbackParam {Property} val
+     * @callbackParam {string} key
+     * @callbackParam {Object} obj
+     * @callbackReturns {NewProperty} mapFn
+     *
      ***/
     'median': function(obj, map) {
       return median(obj, map);
     },
 
     /***
-     * @method min(<obj>, [all] = false, [map])
+     * @method min([all] = false, [map])
      * @returns Mixed
      * @short Returns the key of the property in the object with the lowest value.
      * @extra If [all] is true, will return an object with all properties in the
@@ -3346,7 +3586,7 @@
      *        and is a function mapping the value to be checked or a string acting
      *        as a shortcut.
      *
-     * @callback map
+     * @callback mapFn
      *
      *   val  The value of the current iteration.
      *   key  The key of the current iteration.
@@ -3358,13 +3598,21 @@
      *   Object.min({a:'aaa',b:'bb',c:'c'}, 'length') -> 'c'
      *   Object.min({a:1,b:1,c:3}, true)              -> {a:1,b:1}
      *
+     * @signature min([map])
+     * @param {string|mapFn} map
+     * @param {boolean} [all]
+     * @callbackParam {Property} val
+     * @callbackParam {string} key
+     * @callbackParam {Object} obj
+     * @callbackReturns {NewProperty} mapFn
+     *
      ***/
     'min': function(obj, all, map) {
       return getMinOrMax(obj, all, map, false, true);
     },
 
     /***
-     * @method max(<obj>, [all] = false, [map])
+     * @method max([all] = false, [map])
      * @returns Mixed
      * @short Returns the key of the property in the object with the highest value.
      * @extra If [all] is true, will return an object with all properties in the
@@ -3372,7 +3620,7 @@
      *        and is a function mapping the value to be checked or a string acting
      *        as a shortcut.
      *
-     * @callback map
+     * @callback mapFn
      *
      *   val  The value of the current iteration.
      *   key  The key of the current iteration.
@@ -3384,13 +3632,21 @@
      *   Object.max({a:'aaa',b:'bb',c:'c'}, 'length') -> 'a'
      *   Object.max({a:1,b:3,c:3}, true)              -> {b:3,c:3}
      *
+     * @signature max([map])
+     * @param {string|mapFn} map
+     * @param {boolean} [all]
+     * @callbackParam {Property} val
+     * @callbackParam {string} key
+     * @callbackParam {Object} obj
+     * @callbackReturns {NewProperty} mapFn
+     *
      ***/
     'max': function(obj, all, map) {
       return getMinOrMax(obj, all, map, true, true);
     },
 
     /***
-     * @method least(<obj>, [all] = false, [map])
+     * @method least([all] = false, [map])
      * @returns Mixed
      * @short Returns the key of the property in the object with the least commonly
      *        occuring value.
@@ -3399,7 +3655,7 @@
      *        [all] and is a function mapping the value to be checked or a string
      *        acting as a shortcut.
      *
-     * @callback map
+     * @callback mapFn
      *
      *   val  The value of the current iteration.
      *   key  The key of the current iteration.
@@ -3411,13 +3667,21 @@
      *   Object.least({a:'aa',b:'bb',c:'c'}, 'length') -> 'c'
      *   Object.least({a:1,b:3,c:3}, true)             -> {a:1}
      *
+     * @signature least([map])
+     * @param {string|mapFn} map
+     * @param {boolean} [all]
+     * @callbackParam {Property} val
+     * @callbackParam {string} key
+     * @callbackParam {Object} obj
+     * @callbackReturns {NewProperty} mapFn
+     *
      ***/
     'least': function(obj, all, map) {
       return getLeastOrMost(obj, all, map, false, true);
     },
 
     /***
-     * @method most(<obj>, [all] = false, [map])
+     * @method most([all] = false, [map])
      * @returns Mixed
      * @short Returns the key of the property in the object with the most commonly
      *        occuring value.
@@ -3426,7 +3690,7 @@
      *        [all] and is a function mapping the value to be checked or a string
      *        acting as a shortcut.
      *
-     * @callback map
+     * @callback mapFn
      *
      *   val  The value of the current iteration.
      *   key  The key of the current iteration.
@@ -3437,6 +3701,14 @@
      *   Object.most({a:1,b:3,c:3})                   -> 'b'
      *   Object.most({a:'aa',b:'bb',c:'c'}, 'length') -> 'a'
      *   Object.most({a:1,b:3,c:3}, true)             -> {b:3,c:3}
+     *
+     * @signature most([map])
+     * @param {string|mapFn} map
+     * @param {boolean} [all]
+     * @callbackParam {Property} val
+     * @callbackParam {string} key
+     * @callbackParam {Object} obj
+     * @callbackReturns {NewProperty} mapFn
      *
      ***/
     'most': function(obj, all, map) {
